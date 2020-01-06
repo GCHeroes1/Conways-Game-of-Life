@@ -167,14 +167,14 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
     private class GameBoard extends JPanel implements ComponentListener, MouseListener, MouseMotionListener, Runnable {
         private Dimension d_gameBoardSize = null;
         private ArrayList<Point> point = new ArrayList<Point>(0);
-        
+
         public GameBoard() {
             // Add resizing listener
             addComponentListener(this);
             addMouseListener(this);
             addMouseMotionListener(this);
         }
-        
+
         private void updateArraySize() {
             ArrayList<Point> removeList = new ArrayList<Point>(0);
             for (Point current : point) {
@@ -185,14 +185,14 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             point.removeAll(removeList);
             repaint();
         }
-        
+
         public void addPoint(int x, int y) {
             if (!point.contains(new Point(x,y))) {
                 point.add(new Point(x,y));
-            } 
+            }
             repaint();
         }
-        
+
         public void addPoint(MouseEvent me) {
             int x = me.getPoint().x/BLOCK_SIZE-1;
             int y = me.getPoint().y/BLOCK_SIZE-1;
@@ -200,15 +200,15 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                 addPoint(x,y);
             }
         }
-        
+
         public void removePoint(int x, int y) {
             point.remove(new Point(x,y));
         }
-        
+
         public void resetBoard() {
             point.clear();
         }
-        
+
         public void randomlyFillBoard(int percent) {
             for (int i=0; i<d_gameBoardSize.width; i++) {
                 for (int j=0; j<d_gameBoardSize.height; j++) {
@@ -218,7 +218,7 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                 }
             }
         }
-        
+
         @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -275,7 +275,18 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
         public void mouseMoved(MouseEvent e) {}
 
         @Override
-        public void run() {
+        public void run()
+        {
+            while (true) {
+                try {
+                    Thread.sleep(1000 / i_movesPerSecond);
+                    runA();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+
+        public void runA() {
             boolean[][] gameBoard = new boolean[d_gameBoardSize.width+2][d_gameBoardSize.height+2];
             for (Point current : point) {
                 gameBoard[current.x+1][current.y+1] = true;
@@ -297,7 +308,7 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                         // Cell is alive, Can the cell live? (2-3)
                         if ((surrounding == 2) || (surrounding == 3)) {
                             survivingCells.add(new Point(i-1,j-1));
-                        } 
+                        }
                     } else {
                         // Cell is dead, will the cell be given birth? (3)
                         if (surrounding == 3) {
@@ -309,10 +320,6 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             resetBoard();
             point.addAll(survivingCells);
             repaint();
-            try {
-                Thread.sleep(1000/i_movesPerSecond);
-                run();
-            } catch (InterruptedException ex) {}
         }
     }
 }
