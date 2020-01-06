@@ -277,11 +277,13 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
         @Override
         public void run()
         {
-            while (true) {
+            boolean running = true;
+            while (running) {
                 try {
                     Thread.sleep(1000 / i_movesPerSecond);
                     runA();
                 } catch (InterruptedException ex) {
+                    running = false;
                 }
             }
         }
