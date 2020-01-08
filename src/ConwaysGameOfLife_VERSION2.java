@@ -294,9 +294,9 @@ public class ConwaysGameOfLife_VERSION2 extends JFrame implements ActionListener
                 while (running) {
                     try
                     {
+                        Thread.sleep(1000 / i_movesPerSecond);
                         try
                         {
-                            Thread.sleep(1000 / i_movesPerSecond);
                             gameLock.lock();
                             runA();
                         } finally
