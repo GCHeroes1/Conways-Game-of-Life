@@ -12,6 +12,7 @@ import javax.swing.*;
  * mathematician John Conway.
  */
 public class ConwaysGameOfLife extends JFrame implements ActionListener {
+
     private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(800, 600);
     private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(400, 400);
     private static final int BLOCK_SIZE = 10;
@@ -287,32 +288,34 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
         @Override
         public void mouseMoved(MouseEvent e) {}
 
+        private int cycleCount = 0;
         @Override
         public void run()
         {
+            long start = System.nanoTime();
 //                boolean running = true;
-                while (!Thread.interrupted())
-                {
+            while (!Thread.interrupted() && cycleCount < 100001) {
 //                    try
 //                    {
 //                        Thread.sleep(0 / i_movesPerSecond);
-                        try
-                        {
-                            gameLock.lock();
-                            runA();
-                        } finally
-                        {
-                            gameLock.unlock();
-                        }
+                try {
+                    gameLock.lock();
+                    runA();
+                } finally {
+                    gameLock.unlock();
+                }
 //                    }
 //                catch (InterruptedException ex)
 //                    {
 //                running = false;
 //                    }
-                }
+            }
+            long elapsedTime = (System.nanoTime() - start) / 1000000;
+            System.out.println(elapsedTime);
         }
 
         public void runA() {
+            cycleCount++;
             boolean[][] gameBoard = new boolean[d_gameBoardSize.width+2][d_gameBoardSize.height+2];
             for (Point current : point) {
                 gameBoard[current.x+1][current.y+1] = true;
