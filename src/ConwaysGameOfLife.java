@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.*;
 
@@ -12,7 +14,7 @@ import javax.swing.*;
  * mathematician John Conway.
  */
 public class ConwaysGameOfLife extends JFrame implements ActionListener {
-
+    ExecutorService executor = Executors.newFixedThreadPool(4);
     private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(800, 600);
     private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(400, 400);
     private static final int BLOCK_SIZE = 10;
@@ -111,7 +113,7 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             p_options.setOpaque(false);
             f_options.add(p_options);
             p_options.add(new JLabel("Number of moves per second:"));
-            Integer[] secondOptions = {1,2,3,4,5,10,15,20,60};
+            Integer[] secondOptions = {60};
             final JComboBox cb_seconds = new JComboBox(secondOptions);
             p_options.add(cb_seconds);
             cb_seconds.setSelectedItem(i_movesPerSecond);
@@ -134,7 +136,7 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             p_autoFill.setOpaque(false);
             f_autoFill.add(p_autoFill);
             p_autoFill.add(new JLabel("What percentage should be filled? "));
-            Object[] percentageOptions = {"Select",5,10,15,20,25,30,40,50,60,70,80,90,95};
+            Object[] percentageOptions = {"Select",40};
             final JComboBox cb_percent = new JComboBox(percentageOptions);
             p_autoFill.add(cb_percent);
             cb_percent.addActionListener(new ActionListener() {
@@ -166,22 +168,25 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(null, "Conway's game of life was a cellular animation devised by the mathematician John Conway.\nThis Java, swing based implementation was created by Matthew Burke.\n\nhttp://burke9077.com\nBurke9077@gmail.com\n@burke9077\n\nCreative Commons Attribution 4.0 International");
         }
     }
-    
-    private class GameBoard extends JPanel implements ComponentListener, MouseListener, MouseMotionListener, Runnable {
+
+    private class GameBoard extends JPanel implements ComponentListener, MouseListener, MouseMotionListener, Runnable
+    {
         private Dimension d_gameBoardSize = null;
         private CopyOnWriteArrayList<Point> point = new CopyOnWriteArrayList<>();
 
-        public GameBoard() {
+        public GameBoard()
+        {
             // Add resizing listener
             addComponentListener(this);
             addMouseListener(this);
             addMouseMotionListener(this);
         }
 
-        private void updateArraySize() {
+        private void updateArraySize()
+        {
             ArrayList<Point> removeList = new ArrayList<Point>(0);
             for (Point current : point) {
-                if ((current.x > d_gameBoardSize.width-1) || (current.y > d_gameBoardSize.height-1)) {
+                if ((current.x > d_gameBoardSize.width - 1) || (current.y > d_gameBoardSize.height - 1)) {
                     removeList.add(current);
                 }
             }
@@ -189,106 +194,138 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             repaint();
         }
 
-        public void addPoint(int x, int y) {
-            if (!point.contains(new Point(x,y))) {
-                point.add(new Point(x,y));
+        public void addPoint(int x, int y)
+        {
+            if (!point.contains(new Point(x, y))) {
+                point.add(new Point(x, y));
             }
             repaint();
         }
 
-        public void addPoint(MouseEvent me) {
-            int x = me.getPoint().x/BLOCK_SIZE-1;
-            int y = me.getPoint().y/BLOCK_SIZE-1;
+        public void addPoint(MouseEvent me)
+        {
+            int x = me.getPoint().x / BLOCK_SIZE - 1;
+            int y = me.getPoint().y / BLOCK_SIZE - 1;
             if ((x >= 0) && (x < d_gameBoardSize.width) && (y >= 0) && (y < d_gameBoardSize.height)) {
-                addPoint(x,y);
+                addPoint(x, y);
             }
         }
 
-        public void removePoint(int x, int y) {
-            point.remove(new Point(x,y));
+        public void removePoint(int x, int y)
+        {
+            point.remove(new Point(x, y));
         }
 
-        public void resetBoard() {
+        public void resetBoard()
+        {
             point.clear();
         }
 
-        public void randomlyFillBoard(int percent) {
-            for (int i=0; i<d_gameBoardSize.width; i++) {
-                for (int j=0; j<d_gameBoardSize.height; j++) {
-                    if (Math.random()*100 < percent) {
-                        addPoint(i,j);
+        public void randomlyFillBoard(int percent)
+        {
+            for (int i = 0; i < d_gameBoardSize.width; i++) {
+                for (int j = 0; j < d_gameBoardSize.height; j++) {
+                    if (Math.random() * 100 < percent) {
+                        addPoint(i, j);
                     }
                 }
             }
         }
 
         @Override
-        public void paintComponent(Graphics g) {
+        public void paintComponent(Graphics g)
+        {
             super.paintComponent(g);
             try {
                 for (Point newPoint : point) {
                     // Draw new point
                     g.setColor(Color.blue);
-                    g.fillRect(BLOCK_SIZE + (BLOCK_SIZE*newPoint.x), BLOCK_SIZE + (BLOCK_SIZE*newPoint.y), BLOCK_SIZE, BLOCK_SIZE);
+                    g.fillRect(BLOCK_SIZE + (BLOCK_SIZE * newPoint.x), BLOCK_SIZE + (BLOCK_SIZE * newPoint.y), BLOCK_SIZE, BLOCK_SIZE);
                 }
             } catch (ConcurrentModificationException cme) {
                 System.out.println("CONCURRENCY EXCEPTION!!! \n");
             }
             // Setup grid
             g.setColor(Color.BLACK);
-            for (int i=0; i<=d_gameBoardSize.width; i++) {
-                g.drawLine(((i*BLOCK_SIZE)+BLOCK_SIZE), BLOCK_SIZE, (i*BLOCK_SIZE)+BLOCK_SIZE, BLOCK_SIZE + (BLOCK_SIZE*d_gameBoardSize.height));
+            for (int i = 0; i <= d_gameBoardSize.width; i++) {
+                g.drawLine(((i * BLOCK_SIZE) + BLOCK_SIZE), BLOCK_SIZE, (i * BLOCK_SIZE) + BLOCK_SIZE, BLOCK_SIZE + (BLOCK_SIZE * d_gameBoardSize.height));
             }
-            for (int i=0; i<=d_gameBoardSize.height; i++) {
-                g.drawLine(BLOCK_SIZE, ((i*BLOCK_SIZE)+BLOCK_SIZE), BLOCK_SIZE*(d_gameBoardSize.width+1), ((i*BLOCK_SIZE)+BLOCK_SIZE));
+            for (int i = 0; i <= d_gameBoardSize.height; i++) {
+                g.drawLine(BLOCK_SIZE, ((i * BLOCK_SIZE) + BLOCK_SIZE), BLOCK_SIZE * (d_gameBoardSize.width + 1), ((i * BLOCK_SIZE) + BLOCK_SIZE));
             }
         }
 
         private ReentrantLock gameLock = new ReentrantLock(true);
+
         @Override
-        public void componentResized(ComponentEvent e) {
-            try
-            {
-                // Setup the game board size with proper boundries
+        public void componentResized(ComponentEvent e)
+        {
+            try {
+                // Setup the game size with proper boundries
                 gameLock.lock();
                 d_gameBoardSize = new Dimension(getWidth() / BLOCK_SIZE - 2, getHeight() / BLOCK_SIZE - 2);
                 updateArraySize();
-            }
-            finally
-            {
+            } finally {
                 gameLock.unlock();
             }
         }
+
         @Override
-        public void componentMoved(ComponentEvent e) {}
+        public void componentMoved(ComponentEvent e)
+        {
+        }
+
         @Override
-        public void componentShown(ComponentEvent e) {}
+        public void componentShown(ComponentEvent e)
+        {
+        }
+
         @Override
-        public void componentHidden(ComponentEvent e) {}
+        public void componentHidden(ComponentEvent e)
+        {
+        }
+
         @Override
-        public void mouseClicked(MouseEvent e) {}
+        public void mouseClicked(MouseEvent e)
+        {
+        }
+
         @Override
-        public void mousePressed(MouseEvent e) {}
+        public void mousePressed(MouseEvent e)
+        {
+        }
+
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(MouseEvent e)
+        {
             // Mouse was released (user clicked)
             addPoint(e);
         }
-        @Override
-        public void mouseEntered(MouseEvent e) {}
 
         @Override
-        public void mouseExited(MouseEvent e) {}
+        public void mouseEntered(MouseEvent e)
+        {
+        }
 
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseExited(MouseEvent e)
+        {
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e)
+        {
             // Mouse is being dragged, user wants multiple selections
             addPoint(e);
         }
+
         @Override
-        public void mouseMoved(MouseEvent e) {}
+        public void mouseMoved(MouseEvent e)
+        {
+        }
 
         private int cycleCount = 0;
+
         @Override
         public void run()
         {
@@ -300,6 +337,8 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
 //                        Thread.sleep(0 / i_movesPerSecond);
                 try {
                     gameLock.lock();
+//                    BladeRunner blade = new BladeRunner(gameBoard);
+//                    blade.run();
                     runA();
                 } finally {
                     gameLock.unlock();
@@ -314,15 +353,44 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             System.out.println(elapsedTime);
         }
 
-        public void runA() {
+        public void runA()
+        {
             cycleCount++;
-            boolean[][] gameBoard = new boolean[d_gameBoardSize.width+2][d_gameBoardSize.height+2];
+            boolean[][] gameBoard = new boolean[d_gameBoardSize.width + 2][d_gameBoardSize.height + 2];
             for (Point current : point) {
-                gameBoard[current.x+1][current.y+1] = true;
+                gameBoard[current.x + 1][current.y + 1] = true;
             }
             ArrayList<Point> survivingCells = new ArrayList<Point>(0);
             // Iterate through the array, follow game of life rules
-            for (int i=1; i<gameBoard.length-1; i++) {
+            for (int i = 1; i < gameBoard.length - 1; i++) {
+                int surrounding = 0;
+                BladeRunner blade = new BladeRunner(gameBoard, surrounding, survivingCells, i);
+                blade.run();
+            }
+            resetBoard();
+            point.addAll(survivingCells);
+            repaint();
+        }
+    }
+
+        private class BladeRunner extends JPanel implements Runnable{
+            private boolean[][] gameBoard;
+            private int surrounding;
+            private ArrayList<Point> survivingCells;
+            int i;
+            int j;
+
+            public BladeRunner(boolean[][] gameBoard, int surrounding, ArrayList<Point> survivingCells, int i)
+            {
+                this.gameBoard = gameBoard;
+                this.surrounding = surrounding;
+                this.survivingCells = survivingCells;
+                this.i = i;
+            }
+
+            @Override
+            public void run()
+            {
                 for (int j=1; j<gameBoard[0].length-1; j++) {
                     int surrounding = 0;
                     if (gameBoard[i-1][j-1]) { surrounding++; }
@@ -346,9 +414,5 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                     }
                 }
             }
-            resetBoard();
-            point.addAll(survivingCells);
-            repaint();
         }
     }
-}
