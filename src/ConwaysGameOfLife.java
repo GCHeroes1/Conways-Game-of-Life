@@ -243,7 +243,7 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             }
         }
 
-        ReentrantLock gameLock = new ReentrantLock();
+        private ReentrantLock gameLock = new ReentrantLock(true);
         @Override
         public void componentResized(ComponentEvent e) {
             try
@@ -290,11 +290,12 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
         @Override
         public void run()
         {
-                boolean running = true;
-                while (running) {
-                    try
-                    {
-                            Thread.sleep(1000 / i_movesPerSecond);
+//                boolean running = true;
+                while (!Thread.interrupted())
+                {
+//                    try
+//                    {
+//                        Thread.sleep(0 / i_movesPerSecond);
                         try
                         {
                             gameLock.lock();
@@ -303,11 +304,12 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                         {
                             gameLock.unlock();
                         }
-                    }
-                catch (InterruptedException ex) {
-                running = false;
+//                    }
+//                catch (InterruptedException ex)
+//                    {
+//                running = false;
+//                    }
                 }
-            }
         }
 
         public void runA() {
