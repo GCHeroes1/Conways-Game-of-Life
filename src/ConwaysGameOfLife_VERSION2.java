@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
@@ -5,13 +6,12 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.swing.*;
 
 /**
  * Conway's game of life is a cellular automaton devised by the
  * mathematician John Conway.
  */
-public class ConwaysGameOfLife extends JFrame implements ActionListener {
+public class ConwaysGameOfLife_VERSION2 extends JFrame implements ActionListener {
     private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(800, 600);
     private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(400, 400);
     private static final int BLOCK_SIZE = 10;
@@ -24,21 +24,21 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
     private int i_movesPerSecond = 3;
     private GameBoard gb_gameBoard;
     private Thread game;
-    
+
     public static void main(String[] args) {
         // Setup the swing specifics
-        JFrame game = new ConwaysGameOfLife();
+        JFrame game = new ConwaysGameOfLife_VERSION2();
         game.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         game.setTitle("Conway's Game of Life");
-        game.setIconImage(new ImageIcon(ConwaysGameOfLife.class.getResource("/images/logo.png")).getImage());
+        game.setIconImage(new ImageIcon(ConwaysGameOfLife_VERSION2.class.getResource("/images/logo.png")).getImage());
         game.setSize(DEFAULT_WINDOW_SIZE);
         game.setMinimumSize(MINIMUM_WINDOW_SIZE);
-        game.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width - game.getWidth())/2, 
+        game.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width - game.getWidth())/2,
                 (Toolkit.getDefaultToolkit().getScreenSize().height - game.getHeight())/2);
         game.setVisible(true);
     }
-    
-    public ConwaysGameOfLife() {
+
+    public ConwaysGameOfLife_VERSION2() {
         // Setup menu
         mb_menu = new JMenuBar();
         setJMenuBar(mb_menu);
