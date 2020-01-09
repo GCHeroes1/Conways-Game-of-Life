@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
@@ -361,12 +362,13 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                 gameBoard[current.x + 1][current.y + 1] = true;
             }
             ArrayList<Point> survivingCells = new ArrayList<Point>(0);
-            // Iterate through the array, follow game of life rules
+            CountDownLatch countDown = new CountDownLatch(d_gameBoardSize.width);
             for (int i = 1; i < gameBoard.length - 1; i++) {
-                int surrounding = 0;
-                BladeRunner blade = new BladeRunner(gameBoard, surrounding, survivingCells, i);
-                blade.run();
+                executor.execute(new BladeRunner(gameBoard, survivingCells, i, countDown));
             }
+            try {
+                countDown.await();
+            } catch (InterruptedException e) {}
             resetBoard();
             point.addAll(survivingCells);
             repaint();
@@ -375,23 +377,23 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
 
         private class BladeRunner extends JPanel implements Runnable{
             private boolean[][] gameBoard;
-            private int surrounding;
             private ArrayList<Point> survivingCells;
             int i;
-            int j;
+            private CountDownLatch countDown;
 
-            public BladeRunner(boolean[][] gameBoard, int surrounding, ArrayList<Point> survivingCells, int i)
+            public BladeRunner(boolean[][] gameBoard, ArrayList<Point> survivingCells, int i, CountDownLatch countDown)
             {
                 this.gameBoard = gameBoard;
-                this.surrounding = surrounding;
                 this.survivingCells = survivingCells;
                 this.i = i;
+                this.countDown = countDown;
             }
 
             @Override
             public void run()
             {
-                for (int j=1; j<gameBoard[0].length-1; j++) {
+                for (int j=1; j<gameBoard[0].length-1; j++)
+                {
                     int surrounding = 0;
                     if (gameBoard[i-1][j-1]) { surrounding++; }
                     if (gameBoard[i-1][j])   { surrounding++; }
@@ -404,15 +406,20 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                     if (gameBoard[i][j]) {
                         // Cell is alive, Can the cell live? (2-3)
                         if ((surrounding == 2) || (surrounding == 3)) {
-                            survivingCells.add(new Point(i-1,j-1));
+                            synchronized (this) {
+                                survivingCells.add(new Point(i - 1, j - 1));
+                            }
                         }
                     } else {
                         // Cell is dead, will the cell be given birth? (3)
                         if (surrounding == 3) {
-                            survivingCells.add(new Point(i-1,j-1));
+                            synchronized (this) {
+                                survivingCells.add(new Point(i - 1, j - 1));
+                            }
                         }
                     }
                 }
+                countDown.countDown();
             }
         }
     }
