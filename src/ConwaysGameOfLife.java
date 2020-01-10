@@ -3,10 +3,7 @@ import java.awt.event.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.*;
 
@@ -16,8 +13,8 @@ import javax.swing.*;
  */
 public class ConwaysGameOfLife extends JFrame implements ActionListener {
     ExecutorService executor = Executors.newFixedThreadPool(4);
-    private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(800, 600);
-    private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(400, 400);
+    private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(2160, 3840);
+    private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(2160, 3840);
     private static final int BLOCK_SIZE = 10;
 
     private JMenuBar mb_menu;
@@ -256,7 +253,7 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             }
         }
 
-        private ReentrantLock gameLock = new ReentrantLock(true);
+        private ReentrantLock gameLock = new ReentrantLock();
 
         @Override
         public void componentResized(ComponentEvent e)
@@ -359,26 +356,31 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
 //            System.out.println(cycleCount);
             cycleCount++;
             boolean[][] gameBoard = new boolean[d_gameBoardSize.width + 2][d_gameBoardSize.height + 2];
-            for (Point current : point) {
+            for (Point current : point)
+            {
                 gameBoard[current.x + 1][current.y + 1] = true;
             }
             ArrayList<Point> survivingCells = new ArrayList<Point>(0);
             CountDownLatch countDown = new CountDownLatch(d_gameBoardSize.width);
-            for (int i = 1; i < gameBoard.length - 1; i++) {
+            for (int i = 1; i < gameBoard.length - 1; i++)
+            {
 //                System.out.println("i got here");
                 executor.execute(new BladeRunner(gameBoard, survivingCells, i, countDown));
 //                System.out.println("i got out");
             }
-            try {
+            try
+            {
                 countDown.await();
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e)
+            {
+            }
             resetBoard();
             point.addAll(survivingCells);
 //            repaint();
         }
     }
 
-        private class BladeRunner extends JPanel implements Runnable{
+        private class BladeRunner implements Runnable{
             private boolean[][] gameBoard;
             private ArrayList<Point> survivingCells;
             int i;
@@ -388,7 +390,7 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
             {
                 this.gameBoard = gameBoard;
                 this.survivingCells = survivingCells;
-                this.i = i;
+                this.i  = i;
                 this.countDown = countDown;
             }
 
@@ -408,15 +410,21 @@ public class ConwaysGameOfLife extends JFrame implements ActionListener {
                     if (gameBoard[i+1][j+1]) { surrounding++; }
                     if (gameBoard[i][j]) {
                         // Cell is alive, Can the cell live? (2-3)
-                        if ((surrounding == 2) || (surrounding == 3)) {
-                            synchronized (executor) {
+                        if ((surrounding == 2) || (surrounding == 3))
+                        {
+                            synchronized (executor)
+                            {
                                 survivingCells.add(new Point(i - 1, j - 1));
                             }
                         }
-                    } else {
+                    }
+                    else
+                    {
                         // Cell is dead, will the cell be given birth? (3)
-                        if (surrounding == 3) {
-                            synchronized (executor) {
+                        if (surrounding == 3)
+                        {
+                            synchronized (executor)
+                            {
                                 survivingCells.add(new Point(i - 1, j - 1));
                             }
                         }
