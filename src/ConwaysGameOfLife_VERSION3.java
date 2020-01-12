@@ -15,10 +15,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * mathematician John Conway.
  */
 public class ConwaysGameOfLife_VERSION3 extends JFrame implements ActionListener {
-    ExecutorService executor = Executors.newFixedThreadPool(4);
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
     private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(2160, 3840);
     private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(2160, 3840);
-    private static final int BLOCK_SIZE = 10;
+    private static final int BLOCK_SIZE = 5;
 
     private JMenuBar mb_menu;
     private JMenu m_file, m_game, m_help;
@@ -379,7 +379,7 @@ public class ConwaysGameOfLife_VERSION3 extends JFrame implements ActionListener
             }
             resetBoard();
             point.addAll(survivingCells);
-//            repaint();
+            repaint();
         }
     }
 

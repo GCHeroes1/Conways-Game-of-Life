@@ -12,10 +12,12 @@ import javax.swing.*;
  * mathematician John Conway.
  */
 public class ConwaysGameOfLife extends JFrame implements ActionListener {
-    ExecutorService executor = Executors.newFixedThreadPool(4);
+    ExecutorService executor = Executors.newFixedThreadPool(8);
     private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(2160, 3840);
     private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(2160, 3840);
-    private static final int BLOCK_SIZE = 10;
+//    private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(800, 600);
+//    private static final Dimension MINIMUM_WINDOW_SIZE = new Dimension(400, 400);
+    private static final int BLOCK_SIZE = 5;
 
     private JMenuBar mb_menu;
     private JMenu m_file, m_game, m_help;
